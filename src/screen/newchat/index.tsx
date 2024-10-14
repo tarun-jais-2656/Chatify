@@ -6,34 +6,32 @@ import data from '../../data.json';
 import Contact from '../../components/contact';
 import styles from './styles';
 
-interface NewChat{
+interface NewChat {
   navigation: {
     navigate: (screen: string, params?: any) => void;
     goBack: () => void;
   };
 }
-interface ContactList{
+interface ContactList {
   id: string;
   name: string;
- 
+
 }
 const NewChat: React.FC<NewChat> = ({ navigation }) => {
-  const [searched, setSearched] = useState<boolean>(false);
   const [searchFil, setSearchFil] = useState<string>('');
-  const [filSearch, setFilSearch] = useState<ContactList[]>([]);
+  const [filSearch, setFilSearch] = useState<ContactList[]>(data);
   const handleNavigation = (item: ContactList) => {
     navigation.navigate('Message', { data: item });
   };
 
   const filter = (input: string) => {
-    setSearched(input.length > 0);
     setSearchFil(input);
 
     if (input) {
       const filteredList = data.filter((contact: ContactList) => contact.name.includes(input));
       setFilSearch(filteredList);
     } else {
-      setFilSearch([]);
+      setFilSearch(data);
     }
   };
 
@@ -51,38 +49,30 @@ const NewChat: React.FC<NewChat> = ({ navigation }) => {
             onChangeText={text => filter(text)}
             style={styles.inputText}
           />
-
-          {searched && searchFil.length > 0 && (
-            <TouchableOpacity onPress={() => { setSearched(false); filter(''); }}>
-              <Image source={icon.cross} style={styles.cross} />
-            </TouchableOpacity>
-          )}
         </View>
       </View>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        {searched ? (
-          filSearch.length > 0 ? (
-            <View style={styles.FlatListMainContainer}>
-              <FlatList
-                data={filSearch}
-                renderItem={({ item }) => (
-                  <Contact 
-                    item={item}
-                    onPress={() => handleNavigation(item)}
-                  />
-                )}
-                keyExtractor={(item) => item.id} 
-              />
-            </View>
-          ) : (
-            <View style={styles.Noresult}>
-              <Image source={icon.Noresult} style={styles.noresultimage} />
-            </View>
-          )
-        ) : null}
+        {filSearch.length > 0 ? (
+          <View style={styles.FlatListMainContainer}>
+            <FlatList
+              data={filSearch}
+              renderItem={({ item }) => (
+                <Contact
+                  item={item}
+                  onPress={() => handleNavigation(item)}
+                />
+              )}
+              keyExtractor={(item) => item.id}
+            />
+          </View>
+        ) : (
+          <View style={styles.Noresult}>
+            <Image source={icon.Noresult} style={styles.noresultimage} />
+          </View>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
